@@ -1,6 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
 import { Conversation, Message, ChatState } from '@/types/chat';
-import { OpenAIService } from '@/lib/ai-service';
 import { 
   getStoredConversations, 
   addConversation, 
@@ -16,8 +15,6 @@ export function useChat() {
     isLoading: false,
     error: null,
   });
-
-  const [aiService] = useState(() => new OpenAIService());
 
   useEffect(() => {
     const stored = getStoredConversations();
@@ -186,16 +183,79 @@ export function useChat() {
       const messagesToSend = [...existingMessages, userMessage];
       
       // Debug logging
-      console.log('Sending messages to OpenAI:', messagesToSend.map(m => ({ role: m.role, content: m.content })));
+      console.log('Sending messages to API:', messagesToSend.map(m => ({ role: m.role, content: m.content })));
       
       let fullResponse = '';
       
-      for await (const chunk of aiService.streamChatCompletion(messagesToSend)) {
-        fullResponse += chunk;
-        updateMessage(conversationId, assistantMessageId, {
-          content: fullResponse,
-          isStreaming: true,
-        });
+      // Send request to the API route
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ messages: messagesToSend }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      if (!response.body) {
+        throw new Error('No response body received');
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          
+          // Keep the last incomplete line in buffer
+          buffer = lines.pop() || '';
+
+          for (const line of lines) {
+            const trimmedLine = line.trim();
+            
+            if (!trimmedLine || !trimmedLine.startsWith('data: ')) continue;
+            
+            const jsonStr = trimmedLine.slice(6);
+            
+            try {
+              const data = JSON.parse(jsonStr);
+              console.log('Received SSE data:', data);
+              
+              if (data.error) {
+                throw new Error(data.error);
+              }
+              
+              if (data.done) {
+                console.log('Stream completed');
+                break;
+              }
+              
+              if (data.content) {
+                console.log('Received content chunk:', data.content);
+                fullResponse += data.content;
+                updateMessage(conversationId, assistantMessageId, {
+                  content: fullResponse,
+                  isStreaming: true,
+                });
+              }
+            } catch (parseError) {
+              console.warn('Failed to parse SSE chunk:', jsonStr);
+              continue;
+            }
+          }
+        }
+      } finally {
+        reader.releaseLock();
       }
 
       // Mark as complete
@@ -218,7 +278,7 @@ export function useChat() {
     } finally {
       setState(prev => ({ ...prev, isLoading: false }));
     }
-  }, [state.currentConversationId, state.isLoading, state.conversations, aiService, createConversation, addMessage, updateMessage]);
+  }, [state.currentConversationId, state.isLoading, state.conversations, createConversation, addMessage, updateMessage]);
 
   return {
     conversations: state.conversations,
