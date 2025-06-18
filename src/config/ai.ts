@@ -82,5 +82,5 @@ export const SUPPORTED_MODELS = [
 ] as const;
 
 export function isSupportedModel(model: string): boolean {
-  return SUPPORTED_MODELS.includes(model as any);
+  return SUPPORTED_MODELS.includes(model as typeof SUPPORTED_MODELS[number]);
 } 

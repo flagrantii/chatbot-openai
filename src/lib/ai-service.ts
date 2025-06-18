@@ -65,7 +65,7 @@ export class OpenAIService {
                   console.log('Received chunk content:', content);
                   yield content;
                 }
-              } catch (parseError) {
+              } catch {
                 console.warn('Failed to parse SSE chunk:', jsonStr);
                 continue;
               }
@@ -192,7 +192,7 @@ export class OpenAIService {
          default:
            throw new Error(`OpenAI API Error (${response.status}): ${errorMessage}`);
        }
-    } catch (parseError) {
+    } catch {
       // If we can't parse the error response, use the status text
       throw new Error(errorMessage);
     }
@@ -239,8 +239,8 @@ export class OpenAIService {
 
        const data = await response.json();
        return data.data
-         .filter((model: any) => model.id.includes('gpt'))
-         .map((model: any) => model.id)
+         .filter((model: { id: string }) => model.id.includes('gpt'))
+         .map((model: { id: string }) => model.id)
          .sort();
      } catch (error) {
        console.error('Failed to fetch available models:', error);
@@ -264,7 +264,7 @@ export class OpenAIService {
      try {
        validateConfig();
        return true;
-     } catch (error) {
+     } catch {
        return false;
      }
    }

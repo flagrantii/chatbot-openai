@@ -56,7 +56,7 @@ export default function ChatContainer({ messages, isLoading }: ChatContainerProp
               </h2>
               
               <p className="text-lg text-gray-600 dark:text-gray-400 mb-12 leading-relaxed max-w-2xl mx-auto">
-                I'm here to help you with questions, coding, creative writing, analysis, and more. 
+                I&apos;m here to help you with questions, coding, creative writing, analysis, and more. 
                 Start a conversation below!
               </p>
               
