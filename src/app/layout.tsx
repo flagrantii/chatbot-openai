@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   title: "AI Chat Assistant",
   description: "Clean and modern AI-powered chat interface for intelligent conversations",
   keywords: ["AI", "chat", "assistant", "conversation", "artificial intelligence"],
-  authors: [{ name: "AI Chat Team" }],
+  authors: [{ name: "AuditronX" }],
   viewport: "width=device-width, initial-scale=1, maximum-scale=1",
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#ffffff" },
