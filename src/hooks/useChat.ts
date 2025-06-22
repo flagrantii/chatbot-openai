@@ -248,7 +248,7 @@ export function useChat() {
                   isStreaming: true,
                 });
               }
-            } catch (parseError) {
+            } catch {
               console.warn('Failed to parse SSE chunk:', jsonStr);
               continue;
             }

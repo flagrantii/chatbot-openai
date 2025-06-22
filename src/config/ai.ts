@@ -25,15 +25,6 @@ export const openaiConfig: OpenAIConfig = {
 export function validateConfig(): void {
   const errors: string[] = [];
 
-  // Debug logging
-  console.log('=== DEBUG: Environment Variable Check ===');
-  console.log('OPENAI_API_KEY value:', process.env.OPENAI_API_KEY ? 'EXISTS' : 'MISSING');
-  console.log('OPENAI_API_KEY length:', process.env.OPENAI_API_KEY?.length || 0);
-  console.log('OPENAI_API_KEY starts with sk-:', process.env.OPENAI_API_KEY?.startsWith('sk-') || false);
-  console.log('Config apiKey value:', openaiConfig.apiKey ? 'EXISTS' : 'MISSING');
-  console.log('Config apiKey length:', openaiConfig.apiKey?.length || 0);
-  console.log('==========================================');
-
   // Required fields
   if (!openaiConfig.apiKey) {
     errors.push('OPENAI_API_KEY is required');
