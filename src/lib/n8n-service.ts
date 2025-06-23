@@ -28,7 +28,6 @@ export class N8nService {
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
-      let buffer = "";
 
       try {
         while (true) {
